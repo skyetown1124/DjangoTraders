@@ -1,0 +1,2 @@
+# DjangoTraders
+app for class
