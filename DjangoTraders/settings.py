@@ -36,6 +36,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# GitHub Codespaces only (CODESPACE_NAME is set there and nowhere else): the app is opened through
+# https://<codespace>-8000.app.github.dev, so allow that host and trust it for CSRF (the login forms).
+import os
+if os.environ.get("CODESPACE_NAME"):
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".app.github.dev"]
+    CSRF_TRUSTED_ORIGINS = ["https://*.app.github.dev"]
+
 
 # Application definition
 

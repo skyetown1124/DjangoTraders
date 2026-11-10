@@ -1,0 +1,22 @@
+{
+    // GitHub Codespaces / VS Code Dev Containers setup for DjangoTraders.
+    // Two containers: "app" (Python, where you work) and "db" (Postgres 16, already loaded with
+    // the DjangoTraders database from .devcontainer/db/ the first time it starts).
+    // The app shares the db container's network, so settings.py's localhost:5432 works unchanged.
+    "name": "DjangoTraders",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "app",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+    "postCreateCommand": "pip install --user -r requirements.txt",
+    "postAttachCommand": "echo 'Run the app with:  python manage.py runserver'",
+    "forwardPorts": [8000],
+    "portsAttributes": {
+        "8000": { "label": "DjangoTraders", "onAutoForward": "openBrowser" },
+        "5432": { "label": "Postgres", "onAutoForward": "silent" }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": ["ms-python.python", "batisteo.vscode-django"]
+        }
+    }
+}

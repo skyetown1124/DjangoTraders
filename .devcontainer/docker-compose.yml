@@ -1,0 +1,23 @@
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/python:1-3.13-bookworm
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    # Share the database container's network so the app reaches Postgres at localhost:5432.
+    network_mode: service:db
+
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ISM672Python
+      POSTGRES_DB: DjangoTraders
+    volumes:
+      # Every .sql file here runs once, the first time the database volume is created.
+      - ./db:/docker-entrypoint-initdb.d:ro
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
