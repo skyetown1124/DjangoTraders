@@ -1,0 +1,25 @@
+{% load humanize %}
+{# The On Pace card's chart and its one-line answer (Customer.pace_plot / pace_comparison). Rendered inside the Dashboard tab and again by customer_pace_chart. #}
+{% if pace_plot %}
+    <p class="mb-2">
+        {% if pace.last_total %}
+            {% if pace.partial %}By {{ pace.through|date:"F j" }}{% else %}Over the whole year{% endif %},
+            {{ pace.year }} is at
+            <strong>{% if pace.measure == "revenue" %}${{ pace.this_total|floatformat:0|intcomma }}{% else %}{{ pace.this_total|floatformat:0|intcomma }} {% if pace.measure == "units" %}units{% else %}order{{ pace.this_total|pluralize }}{% endif %}{% endif %}</strong>
+            against
+            {% if pace.measure == "revenue" %}${{ pace.last_total|floatformat:0|intcomma }}{% else %}{{ pace.last_total|floatformat:0|intcomma }}{% endif %}
+            {% if pace.partial %}at the same point in{% else %}in{% endif %} {{ pace.year|add:"-1" }}:
+            <span class="fw-bold {% if pace.change >= 0 %}text-success{% else %}text-danger{% endif %}">
+                {% if pace.change >= 0 %}{{ pace.change|floatformat:0 }}% ahead{% else %}{{ pace.change|floatformat:0|slice:"1:" }}% behind{% endif %}
+            </span>.
+        {% elif pace.last %}
+            {{ pace.year|add:"-1" }} had no orders by {% if pace.partial %}{{ pace.through|date:"F j" }}{% else %}the end of the year{% endif %}, so there is no earlier pace to compare with yet.
+        {% else %}
+            No orders in {{ pace.year|add:"-1" }} to compare with: this chart shows {{ pace.year }} on its own.
+        {% endif %}
+    </p>
+    {{ pace_plot|safe }}
+    <p class="dt-subtle mb-0">Each point is the running total from January 1 to the end of that month. {% if pace.partial %}{{ pace.year }} stops at {{ pace.through|date:"F j" }}, the latest order on record.{% endif %} The gap between the two lines is how far ahead or behind last year you are.</p>
+{% else %}
+    <p class="dt-subtle mb-0">No orders in this year.</p>
+{% endif %}

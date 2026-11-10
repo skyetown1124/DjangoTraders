@@ -1,0 +1,20 @@
+{# Additional feature A (not part of the assignment): is this customer buying more or less than at the same point last year? Show (revenue, units, orders) and Year go to customer_pace_chart, which returns _customer_pace_body.html. #}
+<div class="dt-card">
+    <h5 class="dt-card-title">On Pace with Last Year?</h5>
+    <nav class="dt-controls js-chart-controls"
+         data-url="{% url 'djtraders:customer_pace_chart' customer.customer_id %}"
+         data-target="#customer-pace">
+        <div class="dt-control-group" role="radiogroup" aria-labelledby="pace-measure-label">
+            <span id="pace-measure-label" class="fw-bold">Show</span>
+            {% for key, label in pace_measures.items %}
+                <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="radio" name="pace-measure" data-param="measure"
+                           id="pace-measure-{{ key }}" value="{{ key }}"{% if forloop.first %} checked{% endif %}>
+                    <label class="form-check-label" for="pace-measure-{{ key }}">{{ label }}</label>
+                </div>
+            {% endfor %}
+        </div>
+        {% include "djtraders/dashboards/_year_select.html" with id="pace-year" years=order_years %}
+    </nav>
+    <div id="customer-pace">{% include "djtraders/customers/_customer_pace_body.html" %}</div>
+</div>

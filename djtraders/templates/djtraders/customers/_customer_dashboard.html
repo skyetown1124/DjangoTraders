@@ -1,0 +1,34 @@
+{# Partial (no base.html) for the Dashboard tab -- customer_dashboard view. Every card covers only this customer's own placed orders. Assignment 3, Requirement 2 added the summary tiles and the category and top-product cards; the On Pace card is additional feature A; Buy It Again is Extra Credit 2. #}
+{% if summary %}
+    {% include "djtraders/dashboards/_summary_tiles.html" %}
+    {# Row 1: the two provided charts. #}
+    <div class="row g-3 mb-3">
+        <div class="col-lg-6">
+            {% include "djtraders/customers/_customer_revenue_by_year.html" %}
+        </div>
+        <div class="col-lg-6">
+            {% include "djtraders/customers/_customer_revenue_by_month.html" %}
+        </div>
+    </div>
+    {# Row 2: revenue and unit share by category, with a Year control. #}
+    <div class="mb-3">
+        {% include "djtraders/customers/_customer_revenue_by_category.html" %}
+    </div>
+    {# Row 3: top products by revenue and by units, with Show Top and Year controls. #}
+    <div class="mb-3">
+        {% include "djtraders/customers/_customer_top_products.html" %}
+    </div>
+    {# Row 4: additional feature A, this year's running total against last year's. #}
+    <div class="mb-3">
+        {% include "djtraders/customers/_customer_on_pace.html" %}
+    </div>
+    {# Row 5: Extra Credit 2, Buy It Again -- the products this customer is overdue to reorder. #}
+    <div class="mb-3">
+        {% include "djtraders/customers/_customer_buy_again.html" %}
+    </div>
+{% else %}
+    <div class="dt-card">
+        <h5 class="dt-card-title">Your Dashboard</h5>
+        <p class="mb-0"><i class="fa-solid fa-circle-info dt-icon me-1"></i>{{ customer.company_name }} has no placed orders yet, so there is nothing to chart. The dashboard fills in after the first order.</p>
+    </div>
+{% endif %}

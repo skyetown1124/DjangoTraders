@@ -1,0 +1,43 @@
+{# The call list (Extra Credit 2), redrawn by employee_buy_again_chart when Show Top changes. #}
+{% load humanize %}
+{% if calls %}
+    <p class="small mb-2">
+        <strong>{{ calls_total }}</strong> overdue product{{ calls_total|pluralize }} across your {{ calls_customers }} customer{{ calls_customers|pluralize }},
+        <strong>${{ calls_at_stake|floatformat:"0g" }}</strong> at stake{% if calls|length < calls_total %} (showing {{ calls|length }}, ${{ calls_shown_at_stake|floatformat:"0g" }}){% endif %}.
+    </p>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0 dt-buy-again">
+            <thead>
+                <tr>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Product</th>
+                    <th scope="col" class="text-end">Orders</th>
+                    <th scope="col" class="text-end">Usual gap</th>
+                    <th scope="col" class="text-end">Since last</th>
+                    <th scope="col">Overdue by</th>
+                    <th scope="col" class="text-end">Revenue at stake</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in calls %}
+                    <tr>
+                        <td><a href="{% url 'djtraders:customer_detail' row.customer_id %}">{{ row.customer_name }}</a></td>
+                        <td>{{ row.name }}<div class="dt-subtle small">{{ row.category|default:"" }}</div></td>
+                        <td class="text-end">{{ row.orders }}</td>
+                        <td class="text-end">{{ row.gap }} days</td>
+                        <td class="text-end">{{ row.days_since }} days</td>
+                        <td><span class="dt-pill dt-pill-overdue">{{ row.ratio|floatformat:1 }}× gap</span> <span class="dt-subtle small">{{ row.days_over }} days late</span></td>
+                        <td class="text-end fw-semibold">${{ row.at_stake|floatformat:"2g" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p class="mb-2"><i class="fa-solid fa-circle-check dt-icon me-1"></i>{% if calls_customers == 1 %}Your one customer has{% elif calls_customers %}None of your {{ calls_customers }} customers has{% else %}You have no customers yet, so there is{% endif %} no overdue repeat product right now.</p>
+{% endif %}
+<p class="small mb-0 mt-2 dt-buy-again-advice">
+    <strong>What to do:</strong> call these customers, starting with the most revenue at stake, and ask whether they still need these products or have found another supplier.
+    Their gaps between orders are irregular, so this is a prompt to call, not a forecast that they will order.
+    <span class="dt-subtle">Revenue at stake is one typical reorder: the median revenue of that customer's past orders of the product. Days are counted to the last order on record.</span>
+</p>

@@ -1,0 +1,13 @@
+{# Top products by revenue and by units (Customer.top_product_plots). Show Top and Year both go to customer_top_products_chart, which returns both charts so they always show the same products and period. #}
+<div class="dt-card">
+    <h5 class="dt-card-title">Top Products</h5>
+    <nav class="dt-controls js-chart-controls"
+         data-url="{% url 'djtraders:customer_top_products_chart' customer.customer_id %}"
+         data-target="#customer-top-products">
+        {% include "djtraders/employees/_top_radios.html" with name="customer-products-top" param="top" %}
+        {% include "djtraders/dashboards/_year_select.html" with id="customer-products-year" years=order_years all_years=True %}
+    </nav>
+    <div id="customer-top-products">
+        {% include "djtraders/dashboards/_top_products_charts.html" with revenue_plot=top_revenue_plot units_plot=top_units_plot %}
+    </div>
+</div>

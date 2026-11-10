@@ -1,0 +1,15 @@
+{# Extra Credit 2 ("Buy It Again"): the overdue repeat products of the customers this employee handles (Employee.buy_again_calls), the most revenue at stake first. Show Top goes to employee_buy_again_chart, which returns _employee_buy_again_body.html. #}
+<div class="dt-card">
+    <h5 class="dt-card-title">Customers to Call</h5>
+    <div class="dt-question mb-2">
+        <i class="fa-solid fa-phone me-1"></i>
+        <strong>Buy It Again: which of my customers are overdue for something they buy regularly?</strong>
+        <span class="dt-subtle">Products a customer has bought on at least {{ buy_again_min_orders }} orders, now {{ buy_again_ratio }}× or more past their usual gap. Your customers are the ones whose most recent order you handled.</span>
+    </div>
+    <nav class="dt-controls js-chart-controls"
+         data-url="{% url 'djtraders:employee_buy_again_chart' employee.employee_id %}"
+         data-target="#employee-buy-again">
+        {% include "djtraders/customers/_buy_again_top.html" with name="calls-top" %}
+    </nav>
+    <div id="employee-buy-again">{% include "djtraders/employees/_employee_buy_again_body.html" %}</div>
+</div>

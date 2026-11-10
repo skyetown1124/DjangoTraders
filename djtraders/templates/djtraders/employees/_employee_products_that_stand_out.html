@@ -1,0 +1,29 @@
+{# Assignment 3, Requirement 1 stretch: products where this employee's share of the product's sales is well above or well below their share of company revenue overall (Employee.product_share_outliers). Only this employee's shares are shown, never another employee's figures. #}
+<div class="dt-card h-100">
+    <h5 class="dt-card-title">Products That Stand Out</h5>
+    {% if share_outliers %}
+        <p class="dt-subtle">{% if you_label == "You" %}Your{% else %}{{ employee.first_name }}'s{% endif %} share of all company revenue is <strong>{{ share_outliers.overall|floatformat:1 }}%</strong>. These products (sold on at least 5 orders) are where {% if you_label == "You" %}your{% else %}that{% endif %} share of the product's sales is at least 1.5 times higher, or 1.5 times lower, than that.</p>
+        <table class="table table-sm align-middle mb-2">
+            <thead><tr><th>Well above</th><th class="text-end">Share of its sales</th><th class="text-end">vs. overall</th></tr></thead>
+            <tbody>
+                {% for row in share_outliers.above %}
+                    <tr><td>{{ row.product }}</td><td class="text-end">{{ row.share|floatformat:1 }}%</td><td class="text-end text-success fw-bold">+{{ row.gap|floatformat:1 }} pts</td></tr>
+                {% empty %}
+                    <tr><td colspan="3" class="dt-subtle">None</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <table class="table table-sm align-middle mb-0">
+            <thead><tr><th>Well below</th><th class="text-end">Share of its sales</th><th class="text-end">vs. overall</th></tr></thead>
+            <tbody>
+                {% for row in share_outliers.below %}
+                    <tr><td>{{ row.product }}</td><td class="text-end">{{ row.share|floatformat:1 }}%</td><td class="text-end text-danger fw-bold">{{ row.gap|floatformat:1 }} pts</td></tr>
+                {% empty %}
+                    <tr><td colspan="3" class="dt-subtle">None</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="dt-subtle mb-0">Not enough orders yet to compare products.</p>
+    {% endif %}
+</div>

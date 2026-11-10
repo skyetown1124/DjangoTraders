@@ -1,0 +1,33 @@
+{# The Stock Cover chart and table (Supplier.stock_cover). Rendered inside the Dashboard tab and again by supplier_stock_chart. #}
+{% if stock_plot %}
+    {{ stock_plot|safe }}
+    <table class="table table-sm table-hover align-middle mb-2">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th class="text-end">In stock</th>
+                <th class="text-end">On order</th>
+                <th class="text-end">Reorder level</th>
+                <th class="text-end">Sold per month</th>
+                <th class="text-end">Months of cover</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in stock.rows %}
+                <tr>
+                    <td>{{ row.product }}</td>
+                    <td class="text-end">{{ row.in_stock }}</td>
+                    <td class="text-end">{{ row.on_order }}</td>
+                    <td class="text-end">{{ row.reorder_level }}</td>
+                    <td class="text-end">{{ row.monthly_pace|floatformat:1 }}</td>
+                    <td class="text-end">{% if row.cover is None %}&mdash;{% else %}{{ row.cover|floatformat:1 }}{% endif %}</td>
+                    <td><span class="dt-stock-badge dt-stock-{{ row.status|slugify }}">{{ row.status }}</span></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p class="dt-subtle mb-0">Pace = units sold from {{ stock.start|date:"M j, Y" }} to {{ stock.end|date:"M j, Y" }} (the latest order on record) divided by {{ stock.lookback }}. <strong>Reorder now</strong>: less than 1 month of cover, or stock plus on-order at or below the product's reorder level. <strong>Watch</strong>: less than 2 months. Discontinued products are left out. A short pace window reacts faster to a recent change; a long one smooths out a single big order.</p>
+{% else %}
+    <p class="dt-subtle mb-0">You have no products on sale to check.</p>
+{% endif %}

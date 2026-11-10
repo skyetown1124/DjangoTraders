@@ -1,0 +1,13 @@
+{# Revenue and unit share by category for this supplier's products (Supplier.category_plots). Year goes to supplier_category_chart. #}
+<div class="dt-card">
+    <h5 class="dt-card-title">Revenue by Category</h5>
+    <nav class="dt-controls js-chart-controls"
+         data-url="{% url 'djtraders:supplier_category_chart' supplier.supplier_id %}"
+         data-target="#supplier-category-charts">
+        <span class="dt-subtle">Which of your categories earn the most, and their share of the units you sell.</span>
+        {% include "djtraders/dashboards/_year_select.html" with id="supplier-category-year" years=order_years all_years=True %}
+    </nav>
+    <div id="supplier-category-charts">
+        {% include "djtraders/dashboards/_category_charts.html" with revenue_plot=category_revenue_plot units_plot=category_units_plot %}
+    </div>
+</div>

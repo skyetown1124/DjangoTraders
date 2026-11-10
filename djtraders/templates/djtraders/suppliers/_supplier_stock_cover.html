@@ -1,0 +1,24 @@
+{# Additional feature B (not part of the assignment): do I need to restock? Months of stock left per product at the recent sales pace (Supplier.stock_cover_plot). The "Sales pace over" radio buttons go to supplier_stock_chart, which returns _supplier_stock_cover_body.html. #}
+<div class="dt-card">
+    <h5 class="dt-card-title">Stock Cover</h5>
+    <div class="dt-question mb-2">
+        <i class="fa-solid fa-boxes-stacked me-1"></i>
+        <strong>Do I need to restock?</strong>
+        <span class="dt-subtle">How many months your stock (plus what is already on order) lasts if each product keeps selling at its recent pace.</span>
+    </div>
+    <nav class="dt-controls js-chart-controls"
+         data-url="{% url 'djtraders:supplier_stock_chart' supplier.supplier_id %}"
+         data-target="#supplier-stock">
+        <div class="dt-control-group" role="radiogroup" aria-labelledby="stock-lookback-label">
+            <span id="stock-lookback-label" class="fw-bold">Sales pace over the last</span>
+            {% for months in stock_lookbacks %}
+                <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="radio" name="stock-lookback" data-param="lookback"
+                           id="stock-lookback-{{ months }}" value="{{ months }}"{% if months == 6 %} checked{% endif %}>
+                    <label class="form-check-label" for="stock-lookback-{{ months }}">{{ months }} months</label>
+                </div>
+            {% endfor %}
+        </div>
+    </nav>
+    <div id="supplier-stock">{% include "djtraders/suppliers/_supplier_stock_cover_body.html" %}</div>
+</div>

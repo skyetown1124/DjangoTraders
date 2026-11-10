@@ -1,0 +1,28 @@
+{% load humanize %}
+{# The customers who bought the most of this supplier's products (Supplier.top_customers): company, orders that included this supplier's products, revenue and share of this supplier's revenue -- counted only on this supplier's own lines, so nothing about what else a customer buys. #}
+<div class="dt-card h-100">
+    <h5 class="dt-card-title">Top Customers</h5>
+    <p class="dt-subtle">Customers who bought the most of your products. Orders counts only orders that included your products; share is their part of your total revenue.</p>
+    <table class="table table-sm table-hover align-middle mb-0">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Customer</th>
+                <th class="text-end">Orders</th>
+                <th class="text-end">Revenue</th>
+                <th class="text-end">Share</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in top_customers %}
+                <tr>
+                    <td>{{ row.rank }}</td>
+                    <td>{{ row.customer }}</td>
+                    <td class="text-end">{{ row.orders|intcomma }}</td>
+                    <td class="text-end">${{ row.revenue|floatformat:0|intcomma }}</td>
+                    <td class="text-end">{{ row.share|floatformat:1 }}%</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

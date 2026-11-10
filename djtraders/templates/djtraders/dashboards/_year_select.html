@@ -1,0 +1,10 @@
+{# Assignment 3: a Year dropdown for a dashboard control bar. The including template passes id (the select's id), years (the user's own order years, newest first) and all_years=True to offer "All years" (selected first). Its name is "year", the query parameter ActivateChartControls (DjangoTraders.js) sends. #}
+<div class="dt-control-group">
+    <label for="{{ id }}" class="fw-bold mb-0">Year</label>
+    <select id="{{ id }}" name="year" class="form-select w-auto">
+        {% if all_years %}<option value="all" selected>All years</option>{% endif %}
+        {% for year in years %}
+            <option value="{{ year }}"{% if not all_years and forloop.first %} selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+    </select>
+</div>

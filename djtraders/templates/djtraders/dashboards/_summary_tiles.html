@@ -1,0 +1,80 @@
+{% load humanize %}
+{# Assignment 3, Requirements 2 and 3: the four summary tiles shared by the customer and supplier dashboards, built like the employee tiles (_employee_tiles.html): click one to flip it, the front shows the number, the back explains it. summary comes from _dashboard_summary (models.py). for_supplier switches the wording and the third tile (Average Order for a customer, Units Sold for a supplier). #}
+<div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+        <div class="dt-flip dt-tile-steel h-100" onclick="this.classList.toggle('dt-flipped')" title="Click to flip">
+            <div class="dt-flip-front">
+                <div class="dt-stat-label">Total Revenue</div>
+                <div class="dt-stat-value">${{ summary.revenue|floatformat:0|intcomma }}</div>
+                <div class="dt-stat-note">
+                    {% if summary.ytd_change is not None %}
+                        <span class="fw-bold {% if summary.ytd_change >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            <i class="fa-solid {% if summary.ytd_change >= 0 %}fa-arrow-trend-up{% else %}fa-arrow-trend-down{% endif %}"></i>
+                            {% if summary.ytd_change >= 0 %}+{% endif %}{{ summary.ytd_change|floatformat:1 }}%
+                        </span>
+                        {{ summary.ytd_year }} to date (${{ summary.this_ytd|floatformat:0|intcomma }}) vs. the same dates last year (${{ summary.last_ytd|floatformat:0|intcomma }})
+                    {% else %}
+                        {{ summary.ytd_year }} to date: ${{ summary.this_ytd|floatformat:0|intcomma }} &middot; no orders in the same dates last year to compare with
+                    {% endif %}
+                </div>
+            </div>
+            <div class="dt-flip-back">
+                <div class="dt-stat-label">Total Revenue</div>
+                <div class="dt-stat-note">Revenue on every placed order{% if for_supplier %} line for your products{% endif %}, all years: unit price &times; quantity &times; (1 &minus; discount). The change compares {{ summary.ytd_year }} from January 1 to {{ summary.ytd_through|date:"F j" }} (the latest order on record) with the same dates in {{ summary.ytd_year|add:"-1" }}, so both periods are the same length.</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="dt-flip dt-tile-order h-100" onclick="this.classList.toggle('dt-flipped')" title="Click to flip">
+            <div class="dt-flip-front">
+                <div class="dt-stat-label">Orders</div>
+                <div class="dt-stat-value">{{ summary.orders|intcomma }}</div>
+                <div class="dt-stat-note">Since {{ summary.first_order|date:"M j, Y" }} &middot; across {{ summary.order_years }} year{{ summary.order_years|pluralize }}</div>
+            </div>
+            <div class="dt-flip-back">
+                <div class="dt-stat-label">Orders</div>
+                <div class="dt-stat-note">Placed orders{% if for_supplier %} that included at least one of your products{% endif %}, all years, and the date of the first one.</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        {% if for_supplier %}
+            <div class="dt-flip dt-tile-sage h-100" onclick="this.classList.toggle('dt-flipped')" title="Click to flip">
+                <div class="dt-flip-front">
+                    <div class="dt-stat-label">Units Sold</div>
+                    <div class="dt-stat-value">{{ summary.units|intcomma }}</div>
+                    <div class="dt-stat-note">{{ summary.units_per_order|floatformat:0 }} units per order on average</div>
+                </div>
+                <div class="dt-flip-back">
+                    <div class="dt-stat-label">Units Sold</div>
+                    <div class="dt-stat-note">Units of your products on placed orders, all years, and the average per order.</div>
+                </div>
+            </div>
+        {% else %}
+            <div class="dt-flip dt-tile-sage h-100" onclick="this.classList.toggle('dt-flipped')" title="Click to flip">
+                <div class="dt-flip-front">
+                    <div class="dt-stat-label">Average Order</div>
+                    <div class="dt-stat-value">${{ summary.average_order|floatformat:2|intcomma }}</div>
+                    <div class="dt-stat-note">{{ summary.units|intcomma }} units across {{ summary.orders|intcomma }} order{{ summary.orders|pluralize }}</div>
+                </div>
+                <div class="dt-flip-back">
+                    <div class="dt-stat-label">Average Order</div>
+                    <div class="dt-stat-note">Total revenue divided by the number of orders: what a typical order comes to.</div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="dt-flip dt-tile-slate h-100" onclick="this.classList.toggle('dt-flipped')" title="Click to flip">
+            <div class="dt-flip-front">
+                <div class="dt-stat-label">Last Order</div>
+                <div class="dt-stat-value">{{ summary.last_order|date:"M j, Y" }}</div>
+                <div class="dt-stat-note">{{ summary.days_since_last|intcomma }} day{{ summary.days_since_last|pluralize }} ago</div>
+            </div>
+            <div class="dt-flip-back">
+                <div class="dt-stat-label">Last Order</div>
+                <div class="dt-stat-note">The most recent placed order{% if for_supplier %} with one of your products{% endif %}, and how many days ago that was.</div>
+            </div>
+        </div>
+    </div>
+</div>

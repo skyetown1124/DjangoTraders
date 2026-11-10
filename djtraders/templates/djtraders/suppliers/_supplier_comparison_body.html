@@ -1,0 +1,40 @@
+{% load humanize %}
+{# The comparison chart and table. comparison comes from Supplier.comparison(): this supplier's own figures, the average and the best as bare numbers -- no other supplier's name or row is ever passed to this template, so none can reach the page source. #}
+{% if comparison %}
+    <div class="row g-3">
+        <div class="col-lg-7">{{ comparison_plot|safe }}</div>
+        <div class="col-lg-5">
+            <p class="dt-subtle mb-2">Average is the mean across all {{ comparison.0.supplier_count }} suppliers with sales. Best is the highest single supplier on that measure, not named. Rank 1 is best.</p>
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Measure</th>
+                        <th class="text-end">You</th>
+                        <th class="text-end">Average</th>
+                        <th class="text-end">Best</th>
+                        <th class="text-end">Rank</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in comparison %}
+                        <tr>
+                            <td>{{ row.label }}</td>
+                            {% if row.kind == "money" %}
+                                <td class="text-end fw-bold">${{ row.you|floatformat:0|intcomma }}</td>
+                                <td class="text-end">${{ row.average|floatformat:0|intcomma }}</td>
+                                <td class="text-end">${{ row.best|floatformat:0|intcomma }}</td>
+                            {% else %}
+                                <td class="text-end fw-bold">{{ row.you|floatformat:0|intcomma }}</td>
+                                <td class="text-end">{{ row.average|floatformat:0|intcomma }}</td>
+                                <td class="text-end">{{ row.best|floatformat:0|intcomma }}</td>
+                            {% endif %}
+                            <td class="text-end">{{ row.rank }} of {{ row.supplier_count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% else %}
+    <p class="dt-subtle mb-0">No sales in this period to compare.</p>
+{% endif %}

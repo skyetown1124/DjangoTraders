@@ -1,0 +1,199 @@
+<!--
+    Shared base template: every page extends it and fills in only the title,
+    content and scripts blocks. It lives in templates/common/ (registered in
+    settings.py's TEMPLATES DIRS) because it belongs to the whole project,
+    not to one app.
+
+    CSS: Bootstrap, Font Awesome, DataTables and jQuery UI load first,
+    then DjangoTraders.css last so it can override them. JS: Bootstrap's bundle,
+    jQuery, the plugins that need jQuery (DataTables, jQuery UI), then
+    DjangoTraders.js and one file per entity, all at the end of body so the
+    page's HTML already exists. The scripts block after them lets a page call
+    the function its own table needs.
+
+    Both navbars use the .dt-navbar class (DjangoTraders.css). Each is a nav,
+    an HTML5 landmark, though a div would look the same. A link is a plain a
+    inside a div that carries the button classes (.dt-link-wrap, in
+    DjangoTraders.css), and dt-hover-shadow (DjangoTraders.css) adds the hover shadow.
+
+    The top navbar shows the logo, a Home link and who is logged in (the name
+    links to their own page) with Log Out, or the three login buttons when
+    nobody is. The footer navbar is page info, not navigation.
+
+    Template syntax is parsed even inside an HTML comment, so comments here
+    describe tags in words.
+-->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+      <head>
+            <meta charset="UTF-8">
+            {# Mobile: without this a phone draws the page 980px wide and shrinks it; with it the Bootstrap grid stacks the cards to fit the screen. #}
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta name="description"
+                  content="{% block description %}DJ Traders - Trade with confidence{% endblock %}">
+            <title>{% block title %}DJ Traders{% endblock %}</title>
+            {# Favicon -- reuses the existing logo mark; without this the browser requests /favicon.ico automatically and logs a 404. #}
+            <link rel="icon"
+                  href="{% static 'common/images/logo-mark.svg' %}"
+                  type="image/svg+xml">
+            {# Bootstrap 5.3 via CDN -- every page's base styling. #}
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+                  rel="stylesheet">
+            {# Font Awesome -- icon classes for <i> tags, e.g. fa-solid fa-user. #}
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+                  rel="stylesheet">
+            {# DataTables' stylesheet -- styles the table markup its plugin (loaded at the bottom of body) generates. #}
+            <link href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css"
+                  rel="stylesheet">
+            {# jQuery UI's base theme -- styles the dropdown list its Autocomplete widget (loaded at the bottom of body) builds. #}
+            <link href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+                  rel="stylesheet">
+            {# This project's own CSS, loaded last so it can override anything above. #}
+            <link href="{% static 'common/css/DjangoTraders.css' %}" rel="stylesheet">
+            {# Dark mode, step 1: applies the saved light/dark choice before the page paints, so a dark page never flashes white. Step 2 (the toggle and chart colors) is ActivateThemeToggle in DjangoTraders.js. #}
+            <script src="{% static 'common/js/theme-init.js' %}"></script>
+      </head>
+
+      <body>
+            {# Top navbar -- shared on every page, so there's always a way back. #}
+            <nav class="dt-navbar mx-4 mb-2">
+                  <div class="d-flex align-items-center gap-3">
+                        <div class="dt-link-wrap dt-hover-shadow d-inline-flex align-items-center rounded-2 p-2">
+                              <a href="{% url 'home' %}" title="DjangoTraders Project Home">
+                                    <img src="{% static 'common/images/logo-small.svg' %}"
+                                         alt="DjangoTraders project logo"
+                                         height="36">
+                              </a>
+                        </div>
+
+                        <div class="dt-link-wrap btn dt-btn-secondary-customer dt-hover-shadow">
+                              <a href="{% url 'djtraders:home' %}" title="djTraders App Home">
+                                    <i class="fa-solid fa-house me-1"></i>
+                                    Home
+                              </a>
+                        </div>
+                  </div>
+                  <div class="fw-bold fs-4">DjangoTraders</div>
+                  <div class="d-flex align-items-center gap-3">
+                        {# Light/dark toggle, on every page. A button, not a link: it changes how the page looks, not where you are. ActivateThemeToggle (DjangoTraders.js) wires it up and swaps its icon and label. #}
+                        <button type="button" id="theme-toggle"
+                                class="btn btn-sm dt-btn-theme dt-hover-shadow"
+                                title="Switch to dark mode" aria-pressed="false">
+                              <i class="fa-solid fa-moon me-1" aria-hidden="true"></i>
+                              <span class="js-theme-label">Dark mode</span>
+                        </button>
+                        {# current_customer (djtraders/session_context.py) is None when no customer's logged in. #}
+                        {% if current_customer %}
+                              {# The logged-in customer's name doubles as a link to their own customer page, so every page has a way home for them. #}
+                              <a href="{% url 'djtraders:customer_detail' current_customer.customer_id %}"
+                                 class="text-decoration-none d-inline-block rounded-2 px-2 py-1 dt-hover-shadow"
+                                 title="Go to my customer page">
+                                    <span class="dt-icon">
+                                          <i class="fa-solid fa-user me-1"></i>
+                                          {{ current_customer.company_name }}
+                                    </span>
+                              </a>
+                              <div class="dt-link-wrap btn dt-btn-secondary-customer dt-hover-shadow">
+                                    <a href="{% url 'djtraders:customer_logout' %}" title="Log out">
+                                          <i class="fa-solid fa-right-from-bracket me-1"></i>
+                                          Log Out
+                                    </a>
+                              </div>
+                        {% endif %}
+                        {# current_employee (djtraders/session_context.py) is None when nobody's logged in. #}
+                        {% if current_employee %}
+                              {# Same pattern as the customer and supplier names: the logged-in employee's name links to their own page. #}
+                              <a href="{% url 'djtraders:employee_detail' current_employee.employee_id %}"
+                                 class="text-decoration-none d-inline-block rounded-2 px-2 py-1 dt-hover-shadow"
+                                 title="Go to my employee page">
+                                    <span class="dt-icon-employee">
+                                          <i class="fa-solid fa-user me-1"></i>
+                                          {{ current_employee.first_name }} {{ current_employee.last_name }}
+                                    </span>
+                              </a>
+                              <div class="dt-link-wrap btn dt-btn-secondary-employee dt-hover-shadow">
+                                    <a href="{% url 'djtraders:logout' %}" title="Log out">
+                                          <i class="fa-solid fa-right-from-bracket me-1"></i>
+                                          Log Out
+                                    </a>
+                              </div>
+                        {% endif %}
+                        {# current_supplier (djtraders/session_context.py) is None when no supplier's logged in. #}
+                        {% if current_supplier %}
+                              <a href="{% url 'djtraders:supplier_detail' current_supplier.supplier_id %}"
+                                 class="text-decoration-none d-inline-block rounded-2 px-2 py-1 dt-hover-shadow"
+                                 title="Go to my supplier page">
+                                    <span class="dt-icon-supplier">
+                                          <i class="fa-solid fa-truck-field me-1"></i>
+                                          {{ current_supplier.company_name }}
+                                    </span>
+                              </a>
+                              <div class="dt-link-wrap btn dt-btn-secondary-supplier dt-hover-shadow">
+                                    <a href="{% url 'djtraders:supplier_logout' %}" title="Log out">
+                                          <i class="fa-solid fa-right-from-bracket me-1"></i>
+                                          Log Out
+                                    </a>
+                              </div>
+                        {% endif %}
+                        {# Shown only when nobody's logged in at all -- product_list.html/product_detail.html are reachable without a login, so this is the only login entry point on those pages. #}
+                        {% if not current_customer and not current_employee and not current_supplier %}
+                              <span class="fst-italic text-muted">Not logged in</span>
+                              <div class="dt-link-wrap btn dt-btn-primary-customer dt-hover-shadow">
+                                    <a href="{% url 'djtraders:customer_login' %}"
+                                       title="Log in as a customer">
+                                          <i class="fa-solid fa-user-lock me-1"></i>
+                                          Customer Login
+                                    </a>
+                              </div>
+                              <div class="dt-link-wrap btn dt-btn-primary-employee dt-hover-shadow">
+                                    <a href="{% url 'djtraders:login' %}" title="Log in as an employee">
+                                          <i class="fa-solid fa-user-lock me-1"></i>
+                                          Employee Login
+                                    </a>
+                              </div>
+                              <div class="dt-link-wrap btn dt-btn-primary-supplier dt-hover-shadow">
+                                    <a href="{% url 'djtraders:supplier_login' %}" title="Log in as a supplier">
+                                          <i class="fa-solid fa-user-lock me-1"></i>
+                                          Supplier Login
+                                    </a>
+                              </div>
+                        {% endif %}
+                  </div>
+            </nav>
+
+            <div class="container p-4 dt-content-container">
+                  {# Each child template fills this block with its own heading, intro text, and table -- see customer_list.html. #}
+                  {% block content %}
+                  {% endblock %}
+            </div>
+
+            {# Page-info footer navbar (not navigation) -- see module comment above. #}
+            <nav class="container dt-navbar my-2 small">
+                  <div class="d-flex justify-content-between align-items-center w-100">
+                        <div class="d-flex align-items-center gap-2">
+                              <img src="{% static 'common/images/BSBE.jpeg' %}" alt="BSBE" height="28">
+                              <div>ISM 672 Fall 2026</div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                              <div class="badge text-bg-light text-muted p-2 fst-italic">{% now "N j, Y, P" %}</div>
+                              <div>{{ request.path }}</div>
+                        </div>
+                  </div>
+            </nav>
+            {# Bootstrap's JavaScript bundle powers the tabs and the Details modal; it needs no jQuery. #}
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+            <script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
+            {# jQuery UI -- another jQuery plugin, so it also loads after jQuery. Provides Autocomplete (see AddOrderLineItem's product search, orders.js). #}
+            <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+            {# This project's own JS, loaded last so it can rely on jQuery/DataTables above -- DjangoTraders.js holds what pages share, and one file per entity follows it. #}
+            <script src="{% static 'common/js/DjangoTraders.js' %}"></script>
+            <script src="{% static 'common/js/customers.js' %}"></script>
+            <script src="{% static 'common/js/employees.js' %}"></script>
+            <script src="{% static 'common/js/orders.js' %}"></script>
+            {# A child template calls whichever DataTables activation function its own table needs here -- after all the JS files, so that function already exists, e.g. MakeListDataTable(). #}
+            {% block scripts %}
+            {% endblock %}
+      </body>
+</html>

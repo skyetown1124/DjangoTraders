@@ -1,0 +1,6 @@
+{# Revenue by year with a dashed trend line (Supplier.annual_plot, bar_figure's least-squares fit). #}
+<div class="dt-card h-100">
+    <h5 class="dt-card-title">Revenue by Year</h5>
+    {{ annual_plot|safe }}
+    <p class="dt-subtle mb-0">The dashed line is a straight-line trend through the yearly totals: sloping up means your yearly revenue is growing overall, even if one year dipped. The latest year is only part of a year.</p>
+</div>

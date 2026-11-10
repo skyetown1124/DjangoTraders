@@ -1,0 +1,13 @@
+{# The Extra Credit 1 heatmap and a one-line-per-year summary (Supplier.seasonality_summary). Rendered inside the Dashboard tab and again by supplier_seasonality_chart. #}
+{% if seasonality_plot %}
+    {{ seasonality_plot|safe }}
+    <ul class="small mb-0">
+        {% for row in seasonality_summary %}
+            <li><strong>{{ row.year }}:</strong> the best {{ row.months_to_half }} month{{ row.months_to_half|pluralize }} {{ row.months_to_half|pluralize:"brings,bring" }} in half the year
+                ({{ row.active_months }} of 12 months had sales; busiest: {{ row.busiest }}, {{ row.busiest_share|floatformat:0 }}%).
+                {% if row.months_to_half <= 2 %}Bunched.{% elif row.months_to_half >= 4 %}Fairly steady.{% else %}Somewhat bunched.{% endif %}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p class="dt-subtle mb-0">No sales yet to show by month.</p>
+{% endif %}

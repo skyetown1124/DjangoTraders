@@ -1,0 +1,10 @@
+{# Assignment 3, Requirement 1: each category as a share of this employee's own revenue, beside that category's share of the whole team's combined revenue (Employee.category_mix_plot). The team bars are one combined figure: no colleague appears in them, and only percentages reach the page. #}
+<div class="dt-card h-100">
+    <h5 class="dt-card-title">Category Mix</h5>
+    {% if category_mix_plot %}
+        {{ category_mix_plot|safe }}
+        <p class="dt-subtle mb-0">The {{ you_label }} bars show each category as a percent of {% if you_label == "You" %}your{% else %}{{ employee.first_name }}'s{% endif %} own revenue; the Team bars show that category's share of the whole team's combined revenue. Each set adds up to 100%, so where the {{ you_label }} bar is taller, {% if you_label == "You" %}you sell{% else %}{{ employee.first_name }} sells{% endif %} relatively more of that category than the team does.</p>
+    {% else %}
+        <p class="dt-subtle mb-0">No category mix to show yet.</p>
+    {% endif %}
+</div>

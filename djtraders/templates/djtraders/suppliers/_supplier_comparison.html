@@ -1,0 +1,11 @@
+{# This supplier against all suppliers: you, the average supplier and the best supplier, unnamed (Supplier.comparison / comparison_plot). Year goes to supplier_comparison_chart, which returns _supplier_comparison_body.html. #}
+<div class="dt-card">
+    <h5 class="dt-card-title">Comparison with All Suppliers</h5>
+    <nav class="dt-controls js-chart-controls"
+         data-url="{% url 'djtraders:supplier_comparison_chart' supplier.supplier_id %}"
+         data-target="#supplier-comparison">
+        <span class="dt-subtle">You, the average supplier and the best supplier on each measure. No other supplier is named.</span>
+        {% include "djtraders/dashboards/_year_select.html" with id="supplier-comparison-year" years=order_years all_years=True %}
+    </nav>
+    <div id="supplier-comparison">{% include "djtraders/suppliers/_supplier_comparison_body.html" %}</div>
+</div>

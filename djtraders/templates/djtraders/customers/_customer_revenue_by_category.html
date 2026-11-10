@@ -1,0 +1,13 @@
+{# Revenue by category and unit share by category (Customer.category_plots). The Year dropdown sends ?year= to customer_category_chart, and ActivateChartControls (DjangoTraders.js) replaces #customer-category-charts with both charts. #}
+<div class="dt-card">
+    <h5 class="dt-card-title">Revenue by Category</h5>
+    <nav class="dt-controls js-chart-controls"
+         data-url="{% url 'djtraders:customer_category_chart' customer.customer_id %}"
+         data-target="#customer-category-charts">
+        <span class="dt-subtle">Where your spending goes, and which categories make up the units you buy.</span>
+        {% include "djtraders/dashboards/_year_select.html" with id="customer-category-year" years=order_years all_years=True %}
+    </nav>
+    <div id="customer-category-charts">
+        {% include "djtraders/dashboards/_category_charts.html" with revenue_plot=category_revenue_plot units_plot=category_units_plot %}
+    </div>
+</div>

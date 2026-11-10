@@ -1,0 +1,48 @@
+{# Additional feature C (not part of the assignment): the Price Changes tab, mirrored from the ALI Cost tab (a separate project). A toolbar of server-side filters and an Export to Excel button above an expandable grid: one row per product, expanded into the price periods rebuilt from its order lines (Supplier.price_history). Every filter or sort change asks supplier_prices_grid for a new _supplier_prices_grid.html; suppliers.js runs the toolbar and the grid. #}
+<div class="dt-card">
+    <h5 class="dt-card-title">Price Changes</h5>
+    <div class="dt-question mb-2">
+        <i class="fa-solid fa-tags me-1"></i>
+        <strong>How have my prices changed?</strong>
+        <span class="dt-subtle">Each product's price history, rebuilt from the price on every order line. Expand a product to see each price period.</span>
+    </div>
+
+    <form class="dt-price-toolbar js-price-toolbar" role="search" autocomplete="off"
+          data-grid-url="{% url 'djtraders:supplier_prices_grid' supplier.supplier_id %}"
+          data-export-url="{% url 'djtraders:supplier_prices_export' supplier.supplier_id %}"
+          data-target="#price-grid" onsubmit="return false;">
+        <div class="dt-price-filters">
+            <label class="visually-hidden" for="price-search">Search products</label>
+            <input class="form-control form-control-sm" type="search" id="price-search" name="q"
+                   maxlength="40" placeholder="Search product name or number...">
+            <label class="visually-hidden" for="price-status">Status</label>
+            <select class="form-select form-select-sm" id="price-status" name="status">
+                <option value="">All statuses</option>
+                {% for status in statuses %}<option value="{{ status }}">{{ status }}</option>{% endfor %}
+            </select>
+            <label class="visually-hidden" for="price-flag">Flags</label>
+            <select class="form-select form-select-sm" id="price-flag" name="flag">
+                {% for key, label in flags.items %}
+                    <option value="{{ key }}">{% if key == "any" %}Any flag{% else %}{{ label }} = Yes{% endif %}</option>
+                {% endfor %}
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-secondary js-price-reset">
+                <i class="fa-solid fa-rotate-left me-1"></i>Reset
+            </button>
+        </div>
+        <button type="button" class="btn btn-sm dt-btn-export js-price-export">
+            <i class="fa-solid fa-file-excel me-1"></i>EXPORT TO EXCEL
+        </button>
+    </form>
+    <div class="dt-price-message" role="status" aria-live="polite"></div>
+
+    <div id="price-grid" class="dt-price-grid-host">
+        {% include "djtraders/suppliers/_supplier_prices_grid.html" %}
+    </div>
+    <p class="dt-subtle small mt-2 mb-0">
+        Click a product to select it, double-click (or press Enter) to open its product page.
+        Click a column heading to sort; double-click a second heading (or Shift+Enter) to add a secondary sort.
+        <strong>Off List</strong>: the latest price sold is not today's list price.
+        <strong>Lapsed</strong>: no sales in the {{ lapsed_months }} months up to the last order in the data.
+    </p>
+</div>

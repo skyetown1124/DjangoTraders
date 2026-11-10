@@ -1,0 +1,11 @@
+{# Assignment 3: the two charts of a Revenue by Category card (category_charts in charts.py), shared by the customer and supplier dashboards. Rendered inside the Dashboard tab and again by the card's Year control (customer_category_chart / supplier_category_chart). #}
+{% if revenue_plot %}
+    <div class="row g-3">
+        <div class="col-lg-6">{{ revenue_plot|safe }}</div>
+        <div class="col-lg-6">
+            {% if units_plot %}{{ units_plot|safe }}{% else %}<p class="dt-subtle">No units to show for this year.</p>{% endif %}
+        </div>
+    </div>
+{% else %}
+    <p class="dt-subtle mb-0">No orders in this year, so there is nothing to break down by category.</p>
+{% endif %}

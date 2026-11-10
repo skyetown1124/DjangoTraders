@@ -1,0 +1,66 @@
+<!--
+    The Add to Cart card on order_build.html. It is rendered on the first page
+    load and again after each successful add (a fresh, empty card) or category
+    change (narrowed to that category); AddOrderLineItem (orders.js) swaps it
+    in with no page reload. All three renderers build the context with
+    _add_to_cart_context (views/orders.py).
+-->
+<div id="add-to-cart-card" class="dt-card mb-3">
+    <h5 class="dt-card-title">Add to Cart</h5>
+    <!-- #region [CONCEPT] category filter re-renders this card -->
+    <!-- Not part of the form: on a change, AddOrderLineItem (orders.js) fetches
+         this card for the chosen category from data-card-url and swaps it in. -->
+    <!-- #endregion -->
+    <div class="mb-3">
+        <label for="id_category_filter" class="form-label">Filter by Category</label>
+        <select id="id_category_filter" class="form-select"
+                data-card-url="{% url 'djtraders:order_add_card' customer.customer_id %}">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+                <option value="{{ category.category_id }}"
+                        {% if category.category_id|stringformat:"s" == search_category_id %}selected{% endif %}>{{ category.category_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <form id="order-detail-form" method="post" action="{% url 'djtraders:order_add_line' customer.customer_id %}">
+        {% csrf_token %}
+        <div class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label for="product-search" class="form-label">Product</label>
+                <!-- #region [CONCEPT] Product autocomplete: visible text box + hidden id -->
+                <!-- The text box has no name, so it is never submitted; the hidden
+                     id_product field rendered next carries the chosen product's id. -->
+                <!-- #endregion -->
+                <input type="text" id="product-search" class="form-control"
+                       placeholder="Start typing a product name..." autocomplete="off"
+                       data-search-url="{% url 'djtraders:product_search_json' %}"
+                       data-category="{{ search_category_id }}">
+                {{ detail_form.product }}
+                <div id="product-low-stock-note" class="mt-1 d-none">
+                    <span class="badge text-bg-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i>Low stock</span>
+                    <span class="dt-subtle" id="product-low-stock-count"></span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label for="id_quantity" class="form-label">Quantity</label>
+                {{ detail_form.quantity }}
+            </div>
+            <div class="col-md-3">
+                <label for="id_discount_percent" class="form-label">Discount %</label>
+                {{ detail_form.discount_percent }}
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn dt-btn-primary-customer dt-hover-shadow w-100" title="Add to Cart">
+                    <i class="fa-solid fa-cart-plus me-1"></i>Add to Cart
+                </button>
+            </div>
+        </div>
+        <div id="order-detail-form-error" class="alert alert-danger mt-3 d-none"></div>
+    </form>
+    <!-- #region [CONCEPT] product_stock as JSON, for JS to read -->
+    <!-- json_script, a built-in Django filter, writes product_stock ({product_id:
+         units_in_stock}) into the page as an application/json script tag, escaped
+         like any other template output. orders.js reads it for its stock check. -->
+    <!-- #endregion -->
+    {{ product_stock|json_script:"product-stock-data" }}
+</div>

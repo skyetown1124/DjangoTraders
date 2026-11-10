@@ -1,0 +1,26 @@
+<!--
+    One <tr> for order_build.html's line-items table. It is rendered on the
+    page's first load and by order_add_line's AJAX response (views/orders.py), so a
+    line looks the same either way. customer_id is passed in alongside line,
+    for the Remove button's URL.
+
+    data-product-id on the <tr> is how AddOrderLineItem (orders.js) finds an
+    existing row to replace, instead of appending a duplicate. line.discount_percent
+    is the stored 0.0-1.0 discount times 100, for display (_cart_lines, views/orders.py).
+-->
+<tr data-product-id="{{ line.product.product_id }}">
+    <td>{{ line.product.product_name }}</td>
+    <td class="text-end">${{ line.unit_price|floatformat:2 }}</td>
+    <td class="text-end">{{ line.quantity }}</td>
+    <td class="text-end">{{ line.discount_percent|floatformat:2 }}%</td>
+    <td class="text-end">${{ line.line_total|floatformat:2 }}</td>
+    <td class="text-center">
+        <!-- Remove is one click with no confirm step, like order_detail.html's Cancel Order button (see order_remove_line in views/orders.py). -->
+        <form method="post" action="{% url 'djtraders:order_remove_line' customer_id line.product.product_id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm dt-btn-secondary-customer dt-hover-shadow" title="Remove from cart">
+                <i class="fa-solid fa-trash dt-icon-danger"></i>
+            </button>
+        </form>
+    </td>
+</tr>

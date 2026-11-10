@@ -1,0 +1,111 @@
+{# The Price Changes grid (additional feature C), rendered on the server in the order and with the filters in query (see supplier_prices_grid). data-sort / data-sort2 carry the sort back to suppliers.js. #}
+<div class="dt-price-grid-wrap" data-sort="{% if query.sort %}{{ query.sort.0 }}:{{ query.sort.1 }}{% endif %}"
+     data-sort2="{% if query.sort2 %}{{ query.sort2.0 }}:{{ query.sort2.1 }}{% endif %}">
+    <table class="dt-price-grid">
+        <thead>
+            <tr>
+                <th scope="col" class="dt-price-exp">
+                    <button type="button" class="dt-expander js-price-expand-all" title="Expand all" aria-label="Expand all"
+                            {% if not rows %}disabled{% endif %}><i class="fa-solid fa-chevron-right"></i></button>
+                </th>
+                {% for key, title in sort_columns.items %}
+                    <th scope="col" data-key="{{ key }}" class="dt-price-sortable{% if key in "price change units" %} text-end{% endif %}"
+                        {% for skey, s in sorts.items %}{% if skey == key %}aria-sort="{% if s.1 == 'asc' %}ascending{% else %}descending{% endif %}"{% endif %}{% endfor %}>
+                        <span class="dt-th-label" tabindex="0" role="button"
+                              title="Click to sort · double-click (or Shift+Enter) for a secondary sort">{{ title }}</span>
+                        {% for skey, s in sorts.items %}{% if skey == key %}
+                            <span class="dt-sort-ind" aria-hidden="true">{% if sorts|length > 1 %}{{ s.0 }}{% endif %}{% if s.1 == 'asc' %}&#9650;{% else %}&#9660;{% endif %}</span>
+                        {% endif %}{% endfor %}
+                    </th>
+                {% endfor %}
+                <th scope="col" class="text-center">Off List</th>
+                <th scope="col" class="text-center">Lapsed</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr class="dt-price-parent" tabindex="0" data-id="{{ row.product_id }}"
+                    data-href="{% url 'djtraders:product_detail' row.product_id %}">
+                    <td class="dt-price-exp">
+                        <button type="button" class="dt-expander js-price-expand" data-expand="{{ row.product_id }}"
+                                aria-expanded="false" aria-controls="price-child-{{ row.product_id }}"
+                                aria-label="Expand {{ row.name }}"><i class="fa-solid fa-chevron-right"></i></button>
+                    </td>
+                    <td>
+                        <div class="fw-semibold">{{ row.product_id }} - {{ row.name }}</div>
+                        <div class="dt-subtle small">{{ row.quantity_per_unit|default:"-" }}</div>
+                    </td>
+                    <td>{{ row.category|default:"-" }}</td>
+                    <td><span class="dt-pill dt-pill-{{ row.status|slugify }}">{{ row.status }}</span></td>
+                    <td class="text-end">
+                        {% if row.previous_price is not None %}
+                            <div class="dt-price-cur" title="Previous price">${{ row.previous_price|floatformat:"2g" }}</div>
+                        {% endif %}
+                        <div class="dt-price-new" title="{% if row.sold_price is not None %}Latest price sold{% else %}List price (never sold){% endif %}">{% if row.shown_price is not None %}${{ row.shown_price|floatformat:"2g" }}{% else %}-{% endif %}</div>
+                        {% if row.off_list %}<div class="dt-price-list" title="Today's list price">list ${{ row.list_price|floatformat:"2g" }}</div>{% endif %}
+                    </td>
+                    <td class="text-end">
+                        {% if row.change_pct is None %}-{% else %}
+                            <span class="dt-pct {% if row.change_pct > 0 %}dt-pct-pos{% elif row.change_pct < 0 %}dt-pct-neg{% else %}dt-pct-zero{% endif %}">{% if row.change_pct > 0 %}+{% endif %}{{ row.change_pct|floatformat:1 }}%</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ row.since|date:"m-d-Y"|default:"-" }}</td>
+                    <td>{{ row.last_sold|date:"m-d-Y"|default:"-" }}</td>
+                    <td class="text-end">{% if row.units %}{{ row.units|floatformat:"0g" }}{% else %}-{% endif %}</td>
+                    <td class="text-center">{% if row.off_list is None %}-{% elif row.off_list %}<span class="dt-flag-yes">Yes</span>{% else %}No{% endif %}</td>
+                    <td class="text-center">{% if row.lapsed is None %}-{% elif row.lapsed %}<span class="dt-flag-yes">Yes</span>{% else %}No{% endif %}</td>
+                </tr>
+                <tr class="dt-price-child" id="price-child-{{ row.product_id }}" data-child="{{ row.product_id }}" hidden>
+                    <td></td>
+                    <td colspan="10">
+                        {% if row.periods %}
+                            <table class="dt-price-periods">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Period</th>
+                                        <th scope="col" class="text-end">Unit Price</th>
+                                        <th scope="col" class="text-end">Change</th>
+                                        <th scope="col">Price Start</th>
+                                        <th scope="col">Price End</th>
+                                        <th scope="col" class="text-end">Orders</th>
+                                        <th scope="col" class="text-end">Units</th>
+                                        <th scope="col" class="text-end">Avg Discount</th>
+                                        <th scope="col" class="text-end">Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for period in row.periods %}
+                                        <tr{% if forloop.last %} class="dt-price-latest"{% endif %}>
+                                            <td>{{ forloop.counter }}{% if forloop.last %} <span class="dt-pill dt-pill-current">Latest</span>{% endif %}</td>
+                                            <td class="text-end">${{ period.price|floatformat:"2g" }}</td>
+                                            <td class="text-end">
+                                                {% if period.change_pct is None %}-{% else %}
+                                                    <span class="dt-pct {% if period.change_pct > 0 %}dt-pct-pos{% elif period.change_pct < 0 %}dt-pct-neg{% else %}dt-pct-zero{% endif %}">{% if period.change_pct > 0 %}+{% endif %}{{ period.change_pct|floatformat:1 }}%</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ period.start|date:"m-d-Y" }}</td>
+                                            <td>{{ period.end|date:"m-d-Y" }}</td>
+                                            <td class="text-end">{{ period.orders }}</td>
+                                            <td class="text-end">{{ period.units|floatformat:"0g" }}</td>
+                                            <td class="text-end">{{ period.discount_pct|floatformat:1 }}%</td>
+                                            <td class="text-end">${{ period.revenue|floatformat:"2g" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="dt-subtle py-1">No placed orders for this product yet, so there is no price history.</div>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr class="dt-price-empty">
+                    <td colspan="11">No products match your search. Try adjusting your filters.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="dt-price-footer dt-subtle small">
+    {% if rows %}1 - {{ rows|length }} of {{ rows|length }} product{{ rows|length|pluralize }}{% else %}0 - 0 of 0 products{% endif %}
+</div>

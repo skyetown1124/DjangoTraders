@@ -1,0 +1,11 @@
+{# This supplier's top products by revenue (Supplier.top_products_plot). Show Top and Year go to supplier_top_products_chart. #}
+<div class="dt-card h-100">
+    <h5 class="dt-card-title">Top Products</h5>
+    <nav class="dt-controls js-chart-controls"
+         data-url="{% url 'djtraders:supplier_top_products_chart' supplier.supplier_id %}"
+         data-target="#supplier-top-products">
+        {% include "djtraders/employees/_top_radios.html" with name="supplier-products-top" param="top" %}
+        {% include "djtraders/dashboards/_year_select.html" with id="supplier-products-year" years=order_years all_years=True %}
+    </nav>
+    <div id="supplier-top-products">{{ top_products_plot|safe }}</div>
+</div>

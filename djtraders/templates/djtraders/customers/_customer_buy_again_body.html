@@ -1,0 +1,82 @@
+{# The Buy It Again list (Extra Credit 2), redrawn by customer_buy_again_card when Show Top changes. #}
+{% load humanize %}
+{% if buy_again_rows %}
+    <div class="dt-buy-again-head">
+        <span class="dt-subtle small">
+            Showing {{ buy_again_rows|length }} of {{ buy_again_flagged }} product{{ buy_again_flagged|pluralize }} that are due or overdue
+            ({{ buy_again_repeat }} you buy regularly). <strong>Overdue</strong> means {{ buy_again_ratio }}× your usual gap or more; <strong>Due</strong> means past your usual gap.
+        </span>
+        {% if buy_again_overdue_count %}
+            <form method="post" action="{% url 'djtraders:customer_buy_again_add' customer.customer_id %}" class="mb-0">
+                {% csrf_token %}
+                <input type="hidden" name="all" value="overdue">
+                <button type="submit" class="btn btn-sm dt-btn-buy-again">
+                    <i class="fa-solid fa-cart-plus me-1"></i>Add all {{ buy_again_overdue_count }} overdue to order
+                </button>
+            </form>
+        {% endif %}
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0 dt-buy-again">
+            <thead>
+                <tr>
+                    <th scope="col">Product</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="text-end d-none d-md-table-cell">Orders</th>
+                    <th scope="col" class="text-end d-none d-md-table-cell">Usual gap</th>
+                    <th scope="col" class="text-end d-none d-md-table-cell">Since last</th>
+                    <th scope="col" class="text-end d-none d-md-table-cell">Price</th>
+                    <th scope="col" class="text-end d-none d-md-table-cell">In stock</th>
+                    <th scope="col" class="dt-buy-again-add">Add to order</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in buy_again_rows %}
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">{{ row.name }}</div>
+                            <div class="dt-subtle small">{{ row.category|default:"" }}</div>
+                            {# On a phone the detail columns are hidden; the key facts move under the name. #}
+                            <div class="dt-subtle small d-md-none">every ~{{ row.gap }} days · last {{ row.last|date:"M j, Y" }}{% if row.price is not None %} · ${{ row.price|floatformat:"2g" }}{% endif %}</div>
+                        </td>
+                        <td>
+                            <span class="dt-pill dt-pill-{{ row.status|slugify }}">{{ row.status }}</span>
+                            <div class="dt-subtle small">{{ row.ratio|floatformat:1 }}× your usual gap</div>
+                        </td>
+                        <td class="text-end d-none d-md-table-cell">{{ row.orders }}</td>
+                        <td class="text-end d-none d-md-table-cell">{{ row.gap }} days</td>
+                        <td class="text-end d-none d-md-table-cell">{{ row.days_since }} days<div class="dt-subtle small">{{ row.last|date:"M j, Y" }}</div></td>
+                        <td class="text-end d-none d-md-table-cell">{% if row.price is not None %}${{ row.price|floatformat:"2g" }}{% else %}-{% endif %}</td>
+                        <td class="text-end d-none d-md-table-cell">{{ row.in_stock|intcomma }}</td>
+                        <td class="dt-buy-again-add">
+                            {% if row.add_qty %}
+                                <form method="post" action="{% url 'djtraders:customer_buy_again_add' customer.customer_id %}" class="dt-buy-again-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="product" value="{{ row.product_id }}">
+                                    <label class="visually-hidden" for="buy-again-qty-{{ row.product_id }}">Quantity of {{ row.name }}</label>
+                                    <input class="form-control form-control-sm" type="number" name="quantity" id="buy-again-qty-{{ row.product_id }}"
+                                           value="{{ row.add_qty }}" min="1" max="{{ row.in_stock }}" title="Your usual quantity is {{ row.usual_qty }}">
+                                    <button type="submit" class="btn btn-sm dt-btn-buy-again" aria-label="Add {{ row.name }} to order">
+                                        <i class="fa-solid fa-cart-plus"></i><span class="dt-buy-again-label ms-1">Add</span>
+                                    </button>
+                                </form>
+                                {% if row.add_qty < row.usual_qty %}<div class="dt-subtle small">usually {{ row.usual_qty }}; only {{ row.in_stock }} left</div>{% endif %}
+                            {% else %}
+                                <span class="dt-subtle small">Out of stock</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% elif buy_again_repeat %}
+    <p class="mb-2"><i class="fa-solid fa-circle-check dt-icon me-1"></i>Nothing is due: {% if buy_again_repeat == 1 %}the one product you buy regularly was{% else %}each of the {{ buy_again_repeat }} products you buy regularly was{% endif %} last ordered within its usual gap.</p>
+{% else %}
+    <p class="mb-2"><i class="fa-solid fa-circle-info dt-icon me-1"></i>No product has been bought on {{ buy_again_min_orders }} or more of your orders yet, so there is no reorder pattern to go on. This card fills in as you reorder the same products.</p>
+{% endif %}
+<p class="small mb-0 mt-2 dt-buy-again-advice">
+    <strong>What to do:</strong> check whether you are running low on these products and reorder the ones you still need; Add puts your usual quantity in the cart.
+    Your gaps between orders are irregular, so this is a reminder, not a forecast.
+    <span class="dt-subtle">Days are counted to the last order on record.</span>
+</p>

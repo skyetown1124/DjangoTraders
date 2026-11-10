@@ -1,0 +1,22 @@
+{# Partial (no base.html) for the supplier Dashboard tab -- supplier_dashboard view (Assignment 3, Requirements 3 and 4 and Extra Credit 1, plus additional feature B). Every card covers only this supplier's own products: each Supplier method starts from _placed_lines() (product__supplier=self). The comparison card is the one place other suppliers are involved, and it only ever receives averages and an unnamed best. #}
+{% if summary %}
+    {% include "djtraders/dashboards/_summary_tiles.html" with for_supplier=True %}
+    <div class="row g-3 mb-3">
+        <div class="col-lg-6">{% include "djtraders/suppliers/_supplier_revenue_by_year.html" %}</div>
+        <div class="col-lg-6">{% include "djtraders/suppliers/_supplier_revenue_by_month.html" %}</div>
+    </div>
+    <div class="mb-3">{% include "djtraders/suppliers/_supplier_revenue_by_category.html" %}</div>
+    <div class="row g-3 mb-3">
+        <div class="col-lg-6">{% include "djtraders/suppliers/_supplier_top_products.html" %}</div>
+        <div class="col-lg-6">{% include "djtraders/suppliers/_supplier_top_customers.html" %}</div>
+    </div>
+    <div class="mb-3">{% include "djtraders/suppliers/_supplier_comparison.html" %}</div>
+    <div class="mb-3">{% include "djtraders/suppliers/_supplier_sales_by_country.html" %}</div>
+    <div class="mb-3">{% include "djtraders/suppliers/_supplier_seasonality.html" %}</div>
+    <div class="mb-3">{% include "djtraders/suppliers/_supplier_stock_cover.html" %}</div>
+{% else %}
+    <div class="dt-card">
+        <h5 class="dt-card-title">Your Dashboard</h5>
+        <p class="mb-0"><i class="fa-solid fa-circle-info dt-icon-supplier me-1"></i>None of your products has been on a placed order yet, so there is nothing to chart. Your dashboard fills in after your first sale.</p>
+    </div>
+{% endif %}

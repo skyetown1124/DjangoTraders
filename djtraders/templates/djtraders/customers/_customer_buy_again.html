@@ -1,0 +1,15 @@
+{# Extra Credit 2 ("Buy It Again"): this customer's overdue and due repeat products (Customer.buy_again). Show Top goes to customer_buy_again_card, which returns _customer_buy_again_body.html. Beyond the extra credit, each Add to Order button posts to customer_buy_again_add, which fills the session cart and opens it. #}
+<div class="dt-card">
+    <h5 class="dt-card-title">Buy It Again</h5>
+    <div class="dt-question mb-2">
+        <i class="fa-solid fa-rotate me-1"></i>
+        <strong>What am I overdue to reorder?</strong>
+        <span class="dt-subtle">Products you have bought on at least {{ buy_again_min_orders }} orders, compared with how long you usually wait between them.</span>
+    </div>
+    <nav class="dt-controls js-chart-controls"
+         data-url="{% url 'djtraders:customer_buy_again_card' customer.customer_id %}"
+         data-target="#customer-buy-again">
+        {% include "djtraders/customers/_buy_again_top.html" with name="buy-again-top" %}
+    </nav>
+    <div id="customer-buy-again">{% include "djtraders/customers/_customer_buy_again_body.html" %}</div>
+</div>

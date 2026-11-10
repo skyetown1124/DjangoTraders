@@ -1,0 +1,11 @@
+{# Revenue by month for one year, all twelve months shown (Supplier.monthly_plot). The Year dropdown sends ?year= to supplier_monthly_chart; ActivateChartControls replaces #supplier-monthly. #}
+<div class="dt-card h-100">
+    <h5 class="dt-card-title">Revenue by Month</h5>
+    <nav class="dt-controls js-chart-controls"
+         data-url="{% url 'djtraders:supplier_monthly_chart' supplier.supplier_id %}"
+         data-target="#supplier-monthly">
+        <span class="dt-subtle">Months with no sales show as $0.</span>
+        {% include "djtraders/dashboards/_year_select.html" with id="supplier-monthly-year" years=order_years %}
+    </nav>
+    <div id="supplier-monthly">{{ monthly_plot|safe }}</div>
+</div>

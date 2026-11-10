@@ -1,0 +1,9 @@
+{# Assignment 3, Requirement 2: the customer's top products by revenue and by units, side by side. Rendered inside the Dashboard tab and again by customer_top_products_chart when Show Top or Year changes. #}
+{% if revenue_plot %}
+    <div class="row g-3">
+        <div class="col-lg-6">{{ revenue_plot|safe }}</div>
+        <div class="col-lg-6">{{ units_plot|safe }}</div>
+    </div>
+{% else %}
+    <p class="dt-subtle mb-0">No products ordered in this year.</p>
+{% endif %}
